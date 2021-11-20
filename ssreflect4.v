@@ -123,9 +123,9 @@ Theorem odd_even n : odd n -> even (S n).
 Proof.
     elim: n => [odO|n IH odSn].
     - elim: zero_not_odd. exact: odO.
-    - elim: odSn.
+    - elim: odSn =>[|n0 Ho He].
       + apply: even_SS even_O.
-      + move => n0 Ho He. apply: even_SS He.
+      + apply: even_SS He.
 Restart.
     elim => [|n' IHn' H].
     - by apply/even_SS/even_O.
@@ -143,13 +143,15 @@ Qed.
 
 Theorem even_not_odd n : even n -> ~ odd n.
 Proof.
-    elim: n => [_|n IH evSn].
-    - apply: zero_not_odd.
-    - elim: evSn.
-      + apply: zero_not_odd.
-      + move => n0 ev nod odSS.
-        apply: nod.
-        elim: odSS.
+    elim: n => [ev0|n IH evSn].
+    - exact zero_not_odd.
+    - elim: evSn => [|n0 He Ho].
+      + exact zero_not_odd.
+      + move H: (S (S n0)) => SSn0 HoSSn0.
+        case: HoSSn0 H => // n1 Ho1 Heq.
+        have Heq' : (n0 = n1).
+        apply: eq_add_S. by apply: eq_add_S.
+        apply: Ho. rewrite -> Heq'. apply: Ho1.
 Restart.
     elim.
     - move H: 0 => zero Ho.
@@ -207,11 +209,38 @@ Proof.
     - by apply.
 Qed.
 
-Theorem For_ok (P Q : Prop) : For P Q <-> P \/ Q. Abort.
-Theorem Ffalse_ok : Ffalse <-> False. Abort.
-Theorem Ftrue_ok : Ftrue <-> True. Abort.
-Theorem Feq_ok T (x y : T) : Feq x y <-> x = y. Abort.
-Theorem Fex_ok T (P : T -> Prop) : Fex P <-> exists x, P x. Abort.
+Theorem For_ok (P Q : Prop) : For P Q <-> P \/ Q. 
+Proof.
+    split => [pq | [p|q] X px qx].
+    - apply: pq => H; by [left|right].
+    - apply/px/p.
+    - apply/qx/q.
+Qed.
+
+Theorem Ffalse_ok : Ffalse <-> False.
+Proof.
+    split => [ | []].
+    - apply.
+Qed.
+ 
+Theorem Ftrue_ok : Ftrue <-> True.
+Proof.
+    split => [|[]] //.
+Qed.
+Theorem Feq_ok T (x y : T) : Feq x y <-> x = y.
+Proof.
+    split => [H|H].
+    - apply: (H (fun x => x = y)) => _ -> //.
+    - rewrite H /Feq /Fand => P X.
+      apply => HP //.
+Qed.
+Theorem Fex_ok T (P : T -> Prop) : Fex P <-> exists x, P x.
+Proof.
+    rewrite /Fex.
+    split => [H|[x Hx] X HP].
+    - apply: H => x Px. exists x. exact.
+    - apply/(HP x)/Hx.
+Qed.
 
 Definition Nat := forall X : Prop, (X -> X) -> X -> X.
 Definition Zero : Nat := fun X f x => x.
@@ -255,7 +284,12 @@ Restart.
       done.
 Qed.
 
-Theorem Mult_ok : eq_Nat_op Mult mult. Abort.
+Theorem Mult_ok : eq_Nat_op Mult mult.
+Proof.
+    move => m n X f x.
+    elim: m x => //= m IH x.
+    by rewrite -Plus_ok/Plus/Mult/Succ -IH/Mult.
+Qed.
 
 Definition Pow (M N : Nat) := fun X => N _ (M X). (* MのN乗 *)
 Check Pow. 
@@ -264,8 +298,19 @@ Fixpoint pow m n := match n with 0 => 1 | S n => m * pow m n end.
 Lemma Nat_of_nat_eq : forall n X f1 f2 x,
     (forall y, f1 y = f2 y) ->
     Nat_of_nat n X f1 x = Nat_of_nat n X f2 x.
-Abort.
-Theorem Pow_ok : eq_Nat_op Pow pow. Abort.
+Proof.
+    move=>n X f1 f2 x Heq.
+    elim n => //= n' Heq'.
+    by rewrite /Succ Heq' Heq.
+Qed.
+Theorem Pow_ok : eq_Nat_op Pow pow.
+Proof.
+    move=> m n X f x.
+    elim: n x => //= n IH x.
+    rewrite -Mult_ok/Mult/Pow/Succ.
+    apply: Nat_of_nat_eq => y.
+    by rewrite -IH/Pow.
+Qed.
 
 Section ProdSum. (* 値の対と直和も定義できる *)
     Variable X Y : Prop.
