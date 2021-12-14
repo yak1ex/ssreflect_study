@@ -215,12 +215,22 @@ Proof.
     - apply: pq => H; by [left|right].
     - apply/px/p.
     - apply/qx/q.
+Restart.
+    split => [pq | pq X px qx].
+    - apply: pq. by left. by right.
+    - move: pq. case; done.
+Restart.
+    split => [pq | pq X px qx].
+    - apply: pq. by left. by right.
+    - by case: pq.
 Qed.
 
 Theorem Ffalse_ok : Ffalse <-> False.
 Proof.
     split => [ | []].
     - apply.
+Restart.
+    split => //. apply.
 Qed.
  
 Theorem Ftrue_ok : Ftrue <-> True.
@@ -233,6 +243,15 @@ Proof.
     - apply: (H (fun x => x = y)) => _ -> //.
     - rewrite H /Feq /Fand => P X.
       apply => HP //.
+Restart.
+    split =>[/(_ (fun x => x = y))|-> P X].
+    - apply =>_. exact. (* by apply *)
+    - exact. 
+Restart.
+    split => [H|H].
+    - apply: (H (fun x => x = y)) => _ -> //.
+    - rewrite H /Feq /Fand => P X.
+      exact. (* exact で通る *)
 Qed.
 Theorem Fex_ok T (P : T -> Prop) : Fex P <-> exists x, P x.
 Proof.
@@ -240,6 +259,17 @@ Proof.
     split => [H|[x Hx] X HP].
     - apply: H => x Px. exists x. exact.
     - apply/(HP x)/Hx.
+Restart.
+    split => [|[x Px] X].
+    - apply => x Px. by exists x.
+    - apply. exact Px.
+Restart.
+    split => [|[x Px] X].
+    - apply => x Px. by exists x.
+    - move /(_ _ Px). done.
+Restart.
+    split => [|[x Px] X /(_ _ Px)] //.
+    - apply => x Px. by exists x.
 Qed.
 
 Definition Nat := forall X : Prop, (X -> X) -> X -> X.
@@ -265,7 +295,13 @@ Check eq_Nat_fun. (* (Nat -> Nat) -> (nat -> nat) -> Prop *)
 Check eq_Nat_op. (* (Nat -> Nat -> Nat) -> (nat -> nat -> nat) -> Prop *)
 
 Theorem Succ_ok : eq_Nat_fun Succ S.
-Proof. by elim. Qed. (* 実は自明 *)
+Proof. by elim.
+Restart.
+    by [].
+Restart.
+    move=> n X f x.
+    reflexivity.
+Qed. (* 実は自明 *)
 
 Theorem Plus_ok : eq_Nat_op Plus plus.
 Proof.
@@ -282,6 +318,8 @@ Restart.
       rewrite [in RHS]/Succ.
       rewrite -IH.
       done.
+Restart.
+    elim=>[|m IHm]//= n X f x. by rewrite Succ_ok /= /Succ -IHm.
 Qed.
 
 Theorem Mult_ok : eq_Nat_op Mult mult.
@@ -289,7 +327,22 @@ Proof.
     move => m n X f x.
     elim: m x => //= m IH x.
     by rewrite -Plus_ok/Plus/Mult/Succ -IH/Mult.
+Restart.
+    elim=>[|m IHm]//= n X f x. by rewrite -Plus_ok /= /Plus -IHm.
+Restart.
+    elim=>[|m IHm]//= n X f x.
+    rewrite -Plus_ok /=.
+    rewrite /=.
+    rewrite /Plus.
+    rewrite -IHm.
+    done.
 Qed.
+
+(* elim: a b c => x y z は
+   move: c. move: b. move: a.
+   (* この時点で a -> b -> c -> _ になってる *)
+   elim.
+   move => x. move => y. move => z. *)
 
 Definition Pow (M N : Nat) := fun X => N _ (M X). (* MのN乗 *)
 Check Pow. 
