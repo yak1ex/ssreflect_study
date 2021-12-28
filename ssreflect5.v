@@ -155,6 +155,29 @@ Module Equalities.
         rewrite !expnS !expn0 !muln1. 
         rewrite mulSn mul1n mulnDr !mulnDl [b * a]mulnC.
         by rewrite !addnA.
+    Restart.
+        Check expnS.
+        rewrite !expnS.
+        Check expn0. Print expn0. (* simpleで進まないようになっている *)
+        rewrite !expn0.
+        rewrite !muln1.
+        rewrite mulSn.
+        rewrite mul1n.
+        rewrite mulnDr.
+        rewrite !mulnDl.
+        rewrite [b*a]mulnC.
+        rewrite !addnA.
+        done.
+    Restart.
+        Check mulnn.
+        Check addnn. (* n + n = n.*2 *)
+        Check mul2n.
+        rewrite -!mulnn.
+        rewrite mul2n -addnn.
+        rewrite mulnDr !mulnDl [b*a]mulnC.
+        by rewrite !addnA.
+    Restart.
+        ring. (* 加算の逆元がなくてもよい *)
     Qed.
     Theorem diff_square m n : m >= n -> m^2 - n^2 = (m+n) * (m-n).
     Proof.
@@ -165,6 +188,60 @@ Module Equalities.
         by rewrite subnn addn0.
         done.
         (* rewrite -{2}[m*n]addn0. apply: leq_addr. *)
+    Restart.
+        move=>Hnm.
+        rewrite !expnS.
+        rewrite !expn0.
+        rewrite !muln1.
+        rewrite mulnBr.
+        rewrite !mulnDl.
+        rewrite [n*m]mulnC.
+        Check subnDA.
+        rewrite subnDA.
+        Check addnBA.
+        rewrite -addnBA.
+        rewrite subnn.
+        rewrite addn0.
+        done.
+        done.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn.
+        rewrite mulnBr. (* suBtraction *)
+        rewrite !mulnDl. (* aDd *)
+        rewrite [n*m]mulnC.
+        Check subnDA.
+        rewrite subnDA.
+        Check addnBA.
+        rewrite -addnBA.
+        rewrite subnn.
+        rewrite addn0.
+        done.
+        done.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnBr !mulnDl [n*m]mulnC.
+        rewrite subnDA -addnBA.
+        by rewrite subnn addn0.
+        done.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnBr !mulnDl [n*m]mulnC.
+        rewrite subnDA.
+        Check subnK. (* m <= n -> n - m + m = n *)(* Kancel *)
+        Check addnK. (* cancel (addn^~ n) (subn^~ n) *)
+        by rewrite addnK.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnBr !mulnDl [n*m]mulnC.
+        by rewrite subnDA addnK.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnDl !mulnBr addnBA.
+        - rewrite [n*m]mulnC.
+          rewrite subnK //.
+          by rewrite leq_mul.
+        - by rewrite leq_mul.
     Qed.
     Theorem square_diff m n : m >= n -> (m-n)^2 = m^2 + n^2 - 2 * m * n.
     Proof.
@@ -175,34 +252,101 @@ Module Equalities.
         rewrite mulnBr !mulnBl.
         rewrite -subnDA (addnBA _ Hnm').
         rewrite [n * m]mulnC -{2}[m*n]mul1n -mulSn -mulnA.
-        rewrite subnBA. done.
+        rewrite subnBA.
+        done.
         rewrite -[n*n]mul1n.
         by apply: leq_mul.
+    Restart.
+        move=>Hnm.
+        have Hnm': n * n <= m * n.
+            by apply: leq_mul.
+        rewrite -!mulnn.
+        rewrite mulnBr.
+        rewrite !mulnBl.
+        Check subnDA.
+        rewrite -subnDA.
+        Check addnBA.
+        rewrite (addnBA _ Hnm').
+        rewrite [n * m]mulnC.
+        rewrite -{2}[m*n]mul1n.
+        rewrite -mulSn.
+        rewrite -mulnA.
+        rewrite subnBA.
+        done.
+        rewrite -[n*n]mul1n.
+        by apply: leq_mul.
+    Restart.
+        move=>Hnm.
+        have Hnm': n * n <= m * n.
+            by apply: leq_mul.
+        rewrite -!mulnn mulnBr !mulnBl.
+        rewrite -subnDA (addnBA _ Hnm').
+        rewrite [n*m]mulnC -{2}[m*n]mul1n -mulSn -mulnA.
+        rewrite subnBA //.
+        rewrite -[n*n]mul1n.
+            by apply: leq_mul.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnBr !mulnBl.
+        rewrite -subnDA addnBA ?leq_mul //. (* ?は0回以上 *)
+        rewrite [n*m]mulnC -{2}[m*n]mul1n -mulSn -mulnA.
+        rewrite subnBA //.
+        rewrite -[n*n]mul1n ?leq_mul //.
+    Restart.
+        move=>Hnm.
+        rewrite -!mulnn mulnBr !mulnBl.
+        rewrite subnBA ?leq_mul //.
+        Check addnBAC.
+        rewrite addnBAC ?leq_mul //.
+        rewrite mulnC.
+        by rewrite -subnDA addnn -mul2n mulnA 2!mulnn.
+     Restart.
+        move=>Hnm.
+        rewrite -!mulnn.
+        rewrite mulnBr.
+        rewrite !mulnBl.
+        rewrite subnBA.
+        Undo 1.
+        rewrite subnBA ?leq_mul //.
+        Check addnBAC.
+        rewrite addnBAC.
+        Undo 1.
+        rewrite addnBAC ?leq_mul //.
+        rewrite mulnC.
+        rewrite -subnDA.
+        rewrite addnn.
+        rewrite -mul2n.
+        rewrite mulnA.
+        rewrite 2!mulnn.
+        done.
     Qed.
 End Equalities.
 
 (* 2 単一化と自動化 *)
 
 Lemma test x : 1 + x = x + 1.
-  Check [eta addnC].
+  Check addnC.
+  Check [eta addnC]. (* commutativeを展開したい *)
+  (* forall x y : nat, x + y = y + x *)
   apply: addnC.
 Qed.
 
 Lemma test' x y z : x + y + z = z + y + x.
     Check etrans.
-    (* apply etrans. *)
+    (* apply etrans. (* unable to find an instance for variable y. *) *)
     apply: etrans.
-    apply: addnC.
+    apply: addnC. (* (x + y) + z = z + (x + y) *)
+    (* 上2行と apply (etrans (addnC _ _ )). が同じ *)
     apply: etrans.
     Check f_equal.
-    apply: f_equal.
+    apply: f_equal. (* z + _ *)
     apply: addnC.
     apply: addnA.
 Restart.
     rewrite addnC.
     rewrite (addnC x).
     apply: addnA.
-Abort.
+Qed.
 
 Goal (forall P : nat -> Prop, P O -> (forall n, P n -> P (S n)) ->
     forall n, P n) -> forall n m, n + m = m + n.
@@ -219,4 +363,7 @@ Restart.
     move=> H n m.
     pattern m.
     apply: H. (* n + 0 = 0 + n *)
-Abort.
+    - by apply: addnC.
+    - move=>n' H.
+      by rewrite addnS addSn H.
+Qed.
