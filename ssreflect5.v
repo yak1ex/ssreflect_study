@@ -163,19 +163,60 @@ Module Equalities.
         rewrite mulnBr !mulnDl [n * m]mulnC.
         rewrite subnDA -addnBA.
         by rewrite subnn addn0.
-        rewrite -{2}[m*n]addn0. apply leq_addr.
+        done.
+        (* rewrite -{2}[m*n]addn0. apply: leq_addr. *)
     Qed.
     Theorem square_diff m n : m >= n -> (m-n)^2 = m^2 + n^2 - 2 * m * n.
     Proof.
         move=>Hnm.
+        have Hnm': n * n <= m * n.
+            by apply: leq_mul.
         rewrite !expnS !expn0 !muln1.
         rewrite mulnBr !mulnBl.
-        rewrite subnBA. Abort.
+        rewrite -subnDA (addnBA _ Hnm').
+        rewrite [n * m]mulnC -{2}[m*n]mul1n -mulSn -mulnA.
+        rewrite subnBA. done.
+        rewrite -[n*n]mul1n.
+        by apply: leq_mul.
+    Qed.
 End Equalities.
 
 (* 2 単一化と自動化 *)
 
 Lemma test x : 1 + x = x + 1.
-    Check [eta addnC].
-    apply addnC.
+  Check [eta addnC].
+  apply: addnC.
 Qed.
+
+Lemma test' x y z : x + y + z = z + y + x.
+    Check etrans.
+    (* apply etrans. *)
+    apply: etrans.
+    apply: addnC.
+    apply: etrans.
+    Check f_equal.
+    apply: f_equal.
+    apply: addnC.
+    apply: addnA.
+Restart.
+    rewrite addnC.
+    rewrite (addnC x).
+    apply: addnA.
+Abort.
+
+Goal (forall P : nat -> Prop, P O -> (forall n, P n -> P (S n)) ->
+    forall n, P n) -> forall n m, n + m = m + n.
+    move=> H n m. (* 全ての変数を仮定に *)
+    apply: H. (* n + m = 0 *)
+Restart.
+    move=> H n m.
+    pattern n. (* pattern で正しい述語を構成する *)
+    apply: H. (* 0 + m = m + 0 *)
+Restart.
+    move=> H n. (* forall n を残すとうまくいく *)
+    apply: H. (* n + 0 = 0 + n *)
+Restart.
+    move=> H n m.
+    pattern m.
+    apply: H. (* n + 0 = 0 + n *)
+Abort.
