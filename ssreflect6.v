@@ -59,3 +59,16 @@ Proof.
 Qed.
 
 Check addKn. (* forall n : nat, cancel (addn n) (subn^~ n) *)
+Theorem gcd_max g m n : g %| m -> g %| n -> g %| gcd m n.
+Proof.
+    functional induction (gcd m n).
+        done.
+        move=> Hgm Hgn.
+        apply: (IHn0 _ Hgm).
+        rewrite (divn_eq n m) in Hgn.
+        have Hgnm: g %| n %/ m * m.
+            apply/dvdn_mull/Hgm.
+        rewrite <- (dvdn_addr _ Hgnm).
+        exact Hgn.
+Qed.
+(* addKn 使ってない *)
