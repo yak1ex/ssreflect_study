@@ -90,7 +90,7 @@ Lemma even_double_half n : ~~odd n -> n./2.*2 = n. Admitted.
 (* 本定理 *)
 Theorem main_thm (n p : nat) : n * n = (p * p).*2 -> p = 0.
 Proof.
-    elim/lt_wf_ind: n p => n. (* 清楚帰納法 *)
+    elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
     case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
 Admitted.
 
