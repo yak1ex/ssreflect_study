@@ -100,8 +100,16 @@ Section Sort.
 
     Hint Resolve le_list_insert le_list_trans. (* 補題も候補に加える *)
 
-    Theorem insert_ok a l : sorted l -> sorted (insert a l). Admitted.
-    Theorem isort_ok l : sorted (isort l). Admitted.
+    Theorem insert_ok a l : sorted l -> sorted (insert a l).
+    Proof.
+        elim => [|a' l' Hlelist Hs Hs'] //=. info_auto.
+        case: ifPn => Hle. info_eauto.
+        info_auto.
+    Qed.
+    Theorem isort_ok l : sorted (isort l).
+    Proof.
+        elim l => [|a l' H] //=. apply: insert_ok. exact.
+    Qed.
 
     (* Permutation l1 l2 : リスト l2 は l1 の置換である *)
     Inductive Permutation : list A -> list A -> Prop :=

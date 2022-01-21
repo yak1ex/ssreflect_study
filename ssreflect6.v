@@ -84,8 +84,15 @@ Check ltn_Pdiv. (* forall m d: nat, 1 < d -> 0 < m -> m %/ d < m *)
 Check muln2. (* forall m: nat, m * 2 = m.*2 *)
 Check esym. (* ?x = ?y -> ?y = ?x *)(* forall (A: Type) (x y: A), x = y -> y = x *)
 
-Lemma odd_square n : odd n = odd (n*n). Admitted.
-Lemma even_double_half n : ~~odd n -> n./2.*2 = n. Admitted.
+Lemma odd_square n : odd n = odd (n*n).
+Proof. by rewrite odd_mul andbb. Qed.
+Lemma even_double_half n : ~~odd n -> n./2.*2 = n.
+Proof.
+    move=>H.
+    rewrite -{2}(odd_double_half n) -{1}(add0n (n./2).*2).
+    apply/esym/eqP.
+    by rewrite eqn_add2r eqb0.
+Qed.
 
 (* 本定理 *)
 Theorem main_thm (n p : nat) : n * n = (p * p).*2 -> p = 0.
