@@ -56,6 +56,22 @@ Proof.
           apply: dvdn_add.
           by apply: dvdn_mull.
           exact HL.
+Restart.
+    functional induction (gcd m n).
+    by rewrite dvdn0 dvdnn.
+    move: IHn0 => /andP [HL HR].
+    apply/andP. split => //.
+    rewrite {2}(divn_eq n m).
+    apply: dvdn_add => //.
+    by apply: dvdn_mull.
+Restart.
+    functional induction (gcd m n).
+    - rewrite dvdn0. rewrite dvdnn. done.
+    - apply /andP. move :IHn0. move /andP. case.
+      split => //.
+      rewrite {2}(divn_eq n m).
+      rewrite dvdn_add => //.
+      rewrite dvdn_mull => //.
 Qed.
 
 Check addKn. (* forall n : nat, cancel (addn n) (subn^~ n) *)
@@ -70,8 +86,23 @@ Proof.
             apply/dvdn_mull/Hgm.
         rewrite <- (dvdn_addr _ Hgnm).
         exact Hgn.
+Restart.
+    functional induction (gcd m n) => //.
+    move => Im. rewrite {1}(divn_eq n m) dvdn_addr.
+    - move => In. by move: In Im.
+    - by rewrite dvdn_mull.
+Restart.
+    functional induction (gcd m n) => //.
+    move => Im. rewrite {1}(divn_eq n m) dvdn_addr.
+    - move => In. by apply: IHn0.
+    - by apply: dvdn_mull.
+Restart.
+    (* addKn 使う版 *)
+    functional induction (gcd m n) => // gm gn.
+    apply: IHn0 => //.
+    rewrite -(addKn (n %/ m * m) (n %% m)) -divn_eq.
+      by rewrite dvdn_sub // dvdn_mull.
 Qed.
-(* addKn 使ってない *)
 
 Check odd_mul. (* forall m n : nat, odd (m * n) = odd m && odd n *)
 Check odd_double. (* forall n : nat, odd n.*2 = false *)
@@ -101,7 +132,7 @@ Proof.
     case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
 Admitted.
 
-(* 無理数 *)(* Reals となにかがNotationぶつかってる *)
+(* 無理数 *)(* Reals となにかがNotationぶつかってる *)(* coq8.9.1+ssreflect1.8.0はOK *)
 Require Import Reals Field. (* 実数とそのための field タクティク *)
 
 Definition irrational (x : R) : Prop :=
