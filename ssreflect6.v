@@ -130,7 +130,21 @@ Theorem main_thm (n p : nat) : n * n = (p * p).*2 -> p = 0.
 Proof.
     elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
     case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
-Admitted.
+    have Hon : ~~odd n.
+        apply: negbT. rewrite odd_square Hnp. apply: odd_double.
+    have Hop : ~~odd p.
+        apply: negbT. rewrite odd_square. rewrite -(even_double_half _ Hon) in Hnp.
+        rewrite -muln2 mulnA [n./2*2*n./2]mulnC mulnA in Hnp.
+        rewrite !muln2 in Hnp.
+        rewrite -(double_inj Hnp).
+        apply: odd_double.
+    have Hp20: p./2 = 0 -> p = 0.
+        move => Hp2. by rewrite -double0 -Hp2 (even_double_half _ Hop).
+    apply: Hp20. apply: (IH n./2).
+    - apply/ltP. rewrite -divn2. by apply: ltn_Pdiv.
+    - rewrite -(even_double_half _ Hon) -(even_double_half _ Hop) in Hnp.
+      rewrite -!doubleMr -!doubleMl in Hnp. by apply/double_inj/double_inj.
+Qed.
 
 (* 無理数 *)
 Require Import Reals Field. (* 実数とそのための field タクティク *)
