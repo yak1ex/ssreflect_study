@@ -132,7 +132,7 @@ Proof.
     case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
 Admitted.
 
-(* 無理数 *)(* Reals となにかがNotationぶつかってる *)(* coq8.9.1+ssreflect1.8.0はOK *)
+(* 無理数 *)
 Require Import Reals Field. (* 実数とそのための field タクティク *)
 
 Definition irrational (x : R) : Prop :=
