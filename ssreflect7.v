@@ -123,9 +123,27 @@ Section Sort.
 
         Hint Constructors Permutation.
 
-    Theorem Permutation_refl l : Permutation l l. Admitted.
-    Theorem insert_perm l a : Permutation (a :: l) (insert a l). Admitted.
-    Theorem isort_perm l : Permutation l (isort l). Admitted.
+    Theorem Permutation_refl l : Permutation l l.
+    Proof.
+        elim: l => // a l. apply: perm_skip.
+    Qed.
+    Theorem insert_perm l a : Permutation (a :: l) (insert a l).
+    Proof.
+        elim: l => /= [|a' l IH].
+        - apply: Permutation_refl.
+        - case: ifPn => Hle.
+            + apply/perm_skip/Permutation_refl.
+            + apply: perm_trans.
+              apply: perm_swap.
+              apply/perm_skip/IH.
+    Qed.
+    Theorem isort_perm l : Permutation l (isort l).
+    Proof.
+        elim: l => // a l IH /=.
+        apply: perm_trans.
+        apply/perm_skip/IH.
+        apply: insert_perm.
+    Qed.
 
     (* 証明付き整列関数 *)
     Definition safe_isort l : {l'|sorted l' /\ Permutation l l'}.
