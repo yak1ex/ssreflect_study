@@ -191,6 +191,10 @@ Proof.
     - have Hcontra: (m <= n) && ~~ (m <= n) by rewrite H HH.
       by rewrite andbN in Hcontra.
     - rewrite leq_eqVlt. apply/orP. by right.
+Restart.
+    rewrite !leq'E => H.
+    move: (orP (leq_total m n)) => [HL|HR] //.
+    case: ((negP H) HL).
 Qed.
 
 Definition isort_leq := safe_isort nat leq' leq'_trans leq'_total.
