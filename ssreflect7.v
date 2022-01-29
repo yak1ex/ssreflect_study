@@ -185,7 +185,13 @@ Proof. rewrite /leq' /leq. by case: (m-n). Qed.
 Lemma leq'_trans m n p : leq' m n -> leq' n p -> leq' m p.
 Proof. rewrite !leq'E; apply leq_trans. Qed.
 
-Lemma leq'_total m n : ~~ leq' m n -> leq' n m. Admitted.
+Lemma leq'_total m n : ~~ leq' m n -> leq' n m.
+Proof.
+    rewrite !leq'E => H. case: (leqP m n) => HH.
+    - have Hcontra: (m <= n) && ~~ (m <= n) by rewrite H HH.
+      by rewrite andbN in Hcontra.
+    - rewrite leq_eqVlt. apply/orP. by right.
+Qed.
 
 Definition isort_leq := safe_isort nat leq' leq'_trans leq'_total.
 
