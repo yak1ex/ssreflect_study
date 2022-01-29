@@ -157,6 +157,36 @@ Section Sort.
     | All_nil : All P nil
     | All_cons : forall y l, P y -> All P l -> All P (y::l).
 
+    (* sorted' l : リスト l は整列されている *)
+    Inductive sorted' : list A -> Prop :=
+    | sorted'_nil : sorted' nil
+    | sorted'_cons : forall a l,
+        All (le a) l -> sorted' l -> sorted' (a::l).
+
+    Hint Constructors All sorted'. (* auto の候補にする *)
+
+    Lemma le_list_insert' a b l :
+        le a b -> All (le a) l -> All (le a) (insert b l).
+    Admitted.
+
+    Lemma le_list_trans' a b l :
+        le a b -> All (le b) l -> All (le a) l.
+    Admitted.
+
+    Hint Resolve le_list_insert' le_list_trans'. (* 補題も候補に加える *)
+
+    Theorem insert_ok' a l : sorted' l -> sorted' (insert a l).
+    Admitted.
+    Theorem isort_ok' l : sorted' (isort l).
+    Admitted.
+
+    (* 証明付き整列関数 *)
+    Definition safe_isort' l : {l'|sorted' l' /\ Permutation l l'}.
+        exists (isort l).
+        auto using isort_ok', isort_perm.
+    Defined.
+    Print safe_isort'.
+
 End Sort.
 
 Check safe_isort. (* le と必要な補題を与えなければならない *)
