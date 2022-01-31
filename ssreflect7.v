@@ -167,18 +167,42 @@ Section Sort.
 
     Lemma le_list_insert' a b l :
         le a b -> All (le a) l -> All (le a) (insert b l).
-    Admitted.
+    Proof.
+        move => Hleab.
+        elim => //= [|y l0 Hleay HAl HAb].
+        - auto.
+        - case: ifPn => Hleby ; do 2 apply: All_cons => //.
+    Qed.
 
     Lemma le_list_trans' a b l :
         le a b -> All (le b) l -> All (le a) l.
-    Admitted.
+    Proof.
+        move => Hleab.
+        elim => //= y l0 Hleby HAbl HAal.
+        apply: All_cons => //.
+        apply/le_trans/Hleby/Hleab.
+    Qed.
 
     Hint Resolve le_list_insert' le_list_trans'. (* 補題も候補に加える *)
 
     Theorem insert_ok' a l : sorted' l -> sorted' (insert a l).
-    Admitted.
+    Proof.
+        elim => /= [|a0 l0 IH IH' IH''].
+        - by apply: sorted'_cons.
+        - case: ifPn => Hle.
+          + apply: sorted'_cons.
+            * apply: All_cons => //.
+              apply/le_list_trans'/IH/Hle.
+            * by apply: sorted'_cons.
+          + apply: sorted'_cons => //.
+            apply: le_list_insert' => //.
+            by apply: le_total.
+    Qed.
     Theorem isort_ok' l : sorted' (isort l).
-    Admitted.
+    Proof.
+        elim l => //= a l0 IH.
+        by apply: insert_ok'.
+    Qed.
 
     (* 証明付き整列関数 *)
     Definition safe_isort' l : {l'|sorted' l' /\ Permutation l l'}.
