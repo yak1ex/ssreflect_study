@@ -35,8 +35,25 @@ Proof.
     by apply/le_trans/lebl.
 Qed.
 
-Theorem insert_ok a l : sorted l -> sorted (insert a l). Admitted.
-Theorem isort_ok l : sorted (isort l). Admitted.
+Theorem insert_ok a l : sorted l -> sorted (insert a l).
+Proof.
+    elim: l => //= a0 l0 IH1 /andP[IHL IHR].
+    case: ifPn => Hle /=.
+    - by rewrite Hle (le_seq_trans _ _ _ Hle IHL) IHL IHR.
+    - rewrite le_seq_insert => //.
+        + by rewrite (IH1 IHR).
+        + rewrite le_total => //.
+Restart.
+    elim: l => //= a0 l0 IH1 /andP[IHL IHR].
+    case: ifPn => Hle /=.
+    - by rewrite Hle (le_seq_trans _ _ _ Hle IHL) IHL IHR.
+    - by rewrite (le_seq_insert _ _ _ (le_total _ _ Hle) IHL) (IH1 IHR).
+Qed.
+Theorem isort_ok l : sorted (isort l).
+Proof.
+    elim: l => //= a l IH.
+    by apply: insert_ok.
+Qed.
 
 (* perm_eq が seq で定義されているが補題だけを使う *)
 Theorem insert_perm l a : perm_eq (a :: l) (insert a l).
@@ -47,15 +64,31 @@ Proof.
 Qed.
 
 (* perm_trans : forall (T : eqType), transitive (seq T) perm_eq *)
-Theorem isort_perm l : perm_eq l (isort l). Admitted.
+Theorem isort_perm l : perm_eq l (isort l).
+Proof.
+    elim: l => //= a l IH. Search "perm_".
+    apply/perm_eq_trans/insert_perm.
+    by rewrite perm_cons.
+Qed.
 End sort.
 
 Check isort.
 Definition isortn : seq nat -> seq nat := isort _ leq.
 Definition sortedn := sorted _ leq.
-Lemma leq_total a b : ~~ (a <= b) -> b <= a. Admitted.
+Lemma leq_total a b : ~~ (a <= b) -> b <= a.
+Proof.
+    move: (leq_total a b) => /orP[HL|HR] H => //.
+    case: ((negP H) HL).
+Qed.
 
-Theorem isortn_ok l : sortedn (isortn l) && perm_eq l (isortn l). Admitted.
+Theorem isortn_ok l : sortedn (isortn l) && perm_eq l (isortn l).
+Proof.
+    apply/andP. split.
+    - apply: isort_ok.
+        + move=>m n p. apply: leq_trans.
+        + apply: leq_total.
+    - apply: isort_perm.
+Qed.
 
 Require Import Extraction.
 Extraction "isort.ml" isortn. (* コードが分かりにくい *)
@@ -89,9 +122,35 @@ Proof. reflexivity. Qed.
 Theorem even_not_odd n : even n -> ~~ odd n.
 Proof. done. Qed.
 
-Theorem even_odd n : even n -> odd n.+1. Admitted.
-Theorem odd_even n : odd n -> even n.+1. Admitted.
-Theorem even_or_odd n : even n || odd n. Admitted.
-Theorem odd_odd_even m n : odd m -> odd n = even (m+n). Admitted.
+Theorem even_odd n : even n -> odd n.+1.
+Proof.
+    elim: n => //.
+Restart.
+    done.
+Qed.
+Theorem odd_even n : odd n -> even n.+1.
+Proof.
+    elim: n => //= n IH.
+    rewrite negbK => //.
+Restart.
+    elim: n => //= _ _ -> //.
+Qed.
+Theorem even_or_odd n : even n || odd n.
+Proof.
+    by rewrite orbC orbN.
+Restart.
+    rewrite orbC.
+    rewrite orbN.
+    done.
+Qed.
+Theorem odd_odd_even m n : odd m -> odd n = even (m+n).
+Proof.
+    elim: m => //= n0 IH1 IH2.
+    by rewrite -(even_plus n0 _ IH2) negbK.
+Restart.
+    elim: m => //= n0 IH1 IH2.
+    rewrite -(even_plus n0).
+    - rewrite negbK. reflexivity.
+    - exact IH2.
+Qed.
 End even_odd.
-
