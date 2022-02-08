@@ -132,7 +132,14 @@ Qed.
 (* 本定理 *)
 Theorem main_thm (n p : nat) : n * n = (p * p).*2 -> p = 0.
 Proof.
-    elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
+    Check posnP. (* forall n : nat, eqn0_xor_gt0 n (n == 0) (0 < n) *)
+    Print eqn0_xor_gt0.
+(*
+    Variant eqn0_xor_gt0 (n : nat) : bool -> bool -> Set :=
+	Eq0NotPos : n = 0 -> eqn0_xor_gt0 n true false
+  | PosNotEq0 : 0 < n -> eqn0_xor_gt0 n false true.
+*)
+  elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
     case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
     have Hon : ~~odd n.
         apply: negbT. rewrite odd_square Hnp. apply: odd_double.
@@ -149,29 +156,57 @@ Proof.
     - rewrite -(even_double_half _ Hon) -(even_double_half _ Hop) in Hnp.
       rewrite -!doubleMr -!doubleMl in Hnp. by apply/double_inj/double_inj.
 Restart.
-  elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
-  case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
-  have Hon : ~~odd n.
-      apply: negbT. rewrite odd_square Hnp. apply: odd_double.
-  have Hop : ~~odd p.
-    apply: negbT. rewrite odd_square. rewrite -(even_double_half _ Hon) in Hnp.
-    rewrite -muln2 mulnA [n./2*2*n./2]mulnC mulnA in Hnp.
-    rewrite !muln2 in Hnp.
-    rewrite -(double_inj Hnp).
-    apply: odd_double.
-  rewrite -(even_double_half p Hop).
-  apply/eqP. rewrite double_eq0. apply/eqP.
-  apply: (IH n./2).
-  - apply/ltP. rewrite -divn2. by apply: ltn_Pdiv.
-  - rewrite -(even_double_half _ Hon) -(even_double_half _ Hop) in Hnp.
-    rewrite -!doubleMr -!doubleMl in Hnp. by apply/double_inj/double_inj.
+    elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
+    case: (posnP n).
+    - (* n = 0 *)
+    move=> ->.
+    move=> _.
+    move=>[].
+    + (* p = 0 *) done.
+    + (* 0 < p *) move=>n'. cbn.
+        (* 0 = ((n' + (n' * n'.+1)%Nrec)%coq_nat.*2)%Nrec.+2 -> n'.+1 = 0 *)
+        (* 0 = ... .+2 なので前提が成立しない *)
+        done.
+    - (* 0 < n *)
+    move => Hn IH p Hnp.
+Restart.
+    elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
+    case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
+    have /even_double_half Hon : ~~odd n by rewrite odd_square Hnp odd_double.
+    move: Hnp.
+    rewrite -Hon -muln2 mulnAC mulnA !muln2 => /double_inj Hnp'.
+    have /even_double_half Hop : ~~odd p
+    by rewrite odd_square -Hnp' odd_double.
+    rewrite -Hop.
+    apply/eqP. rewrite double_eq0. apply/eqP.
+    apply: (IH n./2).
+    - apply/ltP. rewrite -divn2. by apply: ltn_Pdiv.
+    - apply/double_inj. by rewrite Hnp' doubleMr Hop mulnC doubleMr Hop.
+Restart.
+    elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
+    case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
+    have /even_double_half Hevenn : ~~odd n by rewrite odd_square Hnp odd_double.
+    move: Hnp.
+    rewrite -Hevenn -muln2 mulnAC mulnA !muln2 => /double_inj /esym Hnp'.
+    have /even_double_half Hevenp : ~~odd p
+      by rewrite odd_square Hnp' odd_double.
+    move: Hnp'.
+    rewrite -Hevenp -muln2 mulnAC muln2 => /double_inj.
+    rewrite mulnA muln2 => /esym /IH -> //.
+    rewrite -divn2.
+    by apply/ltP/ltn_Pdiv.
 Qed.
 
 (* 無理数 *)
 Require Import Reals Field. (* 実数とそのための field タクティク *)
 
 Definition irrational (x : R) : Prop :=
-    forall (p q : nat), q <> 0 -> x <> (INR p / INR q)%R.
+    forall (p q : nat), q <> 0 -> x <> (INR p / INR q)%R. (* %R はringスコープ *)
+Locate "/".
+(* Notation "x / y" := (Rdiv x y) : R_scope *)
+Print Rdiv.
+(* Rdiv = fun r1 r2 : R => (r1 * / r2)%R *)
+(* Notation "/ x" := (RinvImpl.Rinv x) : R_scope *)
 
 Theorem irrational_sqrt_2: irrational (sqrt (INR 2)).
 Proof.
