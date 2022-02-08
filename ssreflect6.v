@@ -123,6 +123,10 @@ Proof.
     rewrite -{2}(odd_double_half n) -{1}(add0n (n./2).*2).
     apply/esym/eqP.
     by rewrite eqn_add2r eqb0.
+Restart.
+    move=>H.
+    rewrite -{2}(odd_double_half n).
+    by rewrite (negbTE H).
 Qed.
 
 (* 本定理 *)
@@ -144,6 +148,23 @@ Proof.
     - apply/ltP. rewrite -divn2. by apply: ltn_Pdiv.
     - rewrite -(even_double_half _ Hon) -(even_double_half _ Hop) in Hnp.
       rewrite -!doubleMr -!doubleMl in Hnp. by apply/double_inj/double_inj.
+Restart.
+  elim/lt_wf_ind: n p => n. (* 整礎帰納法 *)
+  case: (posnP n) => [-> _ [] // | Hn IH p Hnp].
+  have Hon : ~~odd n.
+      apply: negbT. rewrite odd_square Hnp. apply: odd_double.
+  have Hop : ~~odd p.
+    apply: negbT. rewrite odd_square. rewrite -(even_double_half _ Hon) in Hnp.
+    rewrite -muln2 mulnA [n./2*2*n./2]mulnC mulnA in Hnp.
+    rewrite !muln2 in Hnp.
+    rewrite -(double_inj Hnp).
+    apply: odd_double.
+  rewrite -(even_double_half p Hop).
+  apply/eqP. rewrite double_eq0. apply/eqP.
+  apply: (IH n./2).
+  - apply/ltP. rewrite -divn2. by apply: ltn_Pdiv.
+  - rewrite -(even_double_half _ Hon) -(even_double_half _ Hop) in Hnp.
+    rewrite -!doubleMr -!doubleMl in Hnp. by apply/double_inj/double_inj.
 Qed.
 
 (* 無理数 *)
