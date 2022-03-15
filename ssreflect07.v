@@ -202,7 +202,8 @@ Section Sort.
   Defined.
   Print safe_isort.
 
-  (* ex 3.1 2. *)
+  (* ex 3.1 2. *)(* ↑と同じ要領で証明可能 *)
+  (* Lemma: le_list_All a l : All (le a) l <-> le_list a l もあり *)
   Inductive All (P : A -> Prop) : list A -> Prop :=
   | All_nil : All P nil
   | All_cons : forall y l, P y -> All P l -> All P (y::l).
@@ -222,6 +223,9 @@ Section Sort.
     elim => //= [|y l0 Hleay HAl HAb].
     - auto.
     - case: ifPn => Hleby ; do 2 apply: All_cons => //.
+  Restart.
+    move=> leab; elim => {l} [|c l] /=. info_auto. (* {l}でl消して再利用 *)
+    case: ifPn. info_auto. info_auto.
   Qed.
 
   Lemma le_list_trans' a b l :
@@ -231,7 +235,10 @@ Section Sort.
     elim => //= y l0 Hleby HAbl HAal.
     apply: All_cons => //.
     apply/le_trans/Hleby/Hleab.
-  Qed.
+  Restart.
+    move=> leab; elim. info_auto.
+    info_eauto using le_trans. (* 推移律は eauto が必要 *)
+Qed.
 
   Hint Resolve le_list_insert' le_list_trans'. (* 補題も候補に加える *)
 
@@ -247,11 +254,17 @@ Section Sort.
       + apply: sorted'_cons => //.
         apply: le_list_insert' => //.
         by apply: le_total.
+  Restart.
+    elim => [|a' l' Hlelist Hs Hs'] //=. info_auto.
+    case: ifPn => Hle. info_eauto.
+    info_auto.
   Qed.
   Theorem isort_ok' l : sorted' (isort l).
   Proof.
     elim l => //= a l0 IH.
     by apply: insert_ok'.
+  Restart.
+    elim l => [|a l' H] //=. apply: insert_ok'. exact.
   Qed.
 
   (* 証明付き整列関数 *)
@@ -306,6 +319,12 @@ Restart.
     rewrite !leq'E => H.
     move: (orP (leq_total m n)) => [HL|HR] //.
     case: ((negP H) HL).
+Restart.
+  rewrite !leq'E.
+  by case: (m <= n) (leq_total m n).
+Restart.
+  rewrite !leq'E.
+  by case /orP : (leq_total m n) => ->.
 Qed.
 
 Definition isort_leq := safe_isort nat leq' leq'_trans leq'_total.
