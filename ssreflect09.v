@@ -68,7 +68,16 @@ Lemma Tm2 : Tm 2 = 3^m - 3.
 Proof.
     rewrite /Tm.
     have ->: 3^m - 3 = 2^m - 2 + (3^m - 1 - 2^m).
-        admit.
+        rewrite addnBAC.
+        rewrite subnAC addnBA.
+        rewrite subnKC.
+        by rewrite -subnDA.
+        rewrite leq_exp2r //.
+        by apply ltn_trans with 1.
+        rewrite subn_gt0 ltn_exp2r //.
+        by apply ltn_trans with 1.
+        apply ltn_trans with 2 => //.
+        by rewrite -{1}(expn1 2) ltn_exp2l.
     rewrite -Tm1.
     rewrite [in 3^m](_ : 3 = 1+2) //.
     rewrite Pascal.
@@ -79,7 +88,16 @@ Proof.
         by rewrite !addn0 -mulnDr.
     congr (_ + _).
     transitivity ((\sum_(0 <= k < m.+1) 'C(m,k) * 2^k) - 1 - 2^m).
-Admitted.
+        symmetry.
+        rewrite (@big_cat_nat _ _ _ 1) //=.
+        rewrite addnC big_nat1 bin0 expn0 mul1n addnK.
+        rewrite (@big_cat_nat _ _ _ m) //=; last by apply ltnW.
+        by rewrite big_nat1 binn mul1n addnK.
+    rewrite big_mkord.
+    do 2 congr (_ - _).
+    apply eq_bigr => i _.
+    by rewrite exp1n mul1n.
+Qed.
 
 Theorem Tmn n : Tm n.+1 = n.+2^m - n.+2.
 Proof.
@@ -87,6 +105,13 @@ Proof.
         by apply Tm1.
     have Hm': m > 0 by apply ltnW.
     have ->: n.+3 ^ m - n.+3 = n.+2 ^ m - n.+2 + (n.+3 ^ m - 1 - n.+2 ^ m).
+        rewrite addnBAC.
+        rewrite subnAC addnBA.
+        rewrite subnKC.
+        by rewrite -subnDA.
+        rewrite leq_exp2r //.
+        rewrite subn_gt0 ltn_exp2r //.
+        by rewrite -{1}(expn1 n.+2) leq_exp2l.
 Admitted.
 
 Theorem Skp p k : p > 2 -> prime p -> 1 <= k < p.-1 -> p %| Sk k p.-1.
