@@ -11,10 +11,18 @@ This repo includes MY working memo for SSReflect study sessions in [coqtokyo](ht
 |[ssreflect04_.v](ssreflect04_.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq4.pdf)|:heavy_check_mark: Session finished|-impredicative-set||
 |[ssreflect05.v](ssreflect05.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq5.pdf)|:heavy_check_mark: Session finished||
 |[ssreflect06.v](ssreflect06.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq6.pdf)|:heavy_check_mark: Session finished||
-|[ssreflect07.v](ssreflect07.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq7.pdf)|:arrow_right: Just my solution||
-|[ssreflect08.v](ssreflect08.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq8.pdf)|:arrow_right: Just my solution||
-|[ssreflect09.v](ssreflect09.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq9.pdf)|:no_entry_sign: Not yet prepared||
+|[ssreflect07.v](ssreflect07.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq7.pdf)|:heavy_check_mark: Session finished||
+|[ssreflect08.v](ssreflect08.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq8.pdf)|:arrow_forward: Session ongoing||
+|[ssreflect09.v](ssreflect09.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq9.pdf)|:arrows_counterclockwise: Preparing||
 |[ssreflect10.v](ssreflect10.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq10.pdf)|:no_entry_sign: Not yet prepared||
 |[ssreflect11.v](ssreflect11.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq11.pdf)|:no_entry_sign: Not yet prepared||
 |[ssreflect12.v](ssreflect12.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq12.pdf)|:no_entry_sign: Not yet prepared||
 |[ssreflect13.v](ssreflect13.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq13.pdf)|:no_entry_sign: Not yet prepared||
+
+## status
+
+- :heavy_check_mark: Session finished
+- :arrow_forward: Session ongoing
+- :arrow_heading_up: Just my solution
+- :arrows_counterclockwise: Preparing
+- :no_entry_sign: Not yet prepared
