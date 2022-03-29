@@ -1,5 +1,7 @@
 From mathcomp Require Import all_ssreflect.
 
+(* 2 整列の証明、再び *)
+
 Section sort.
 Variable A : eqType.
 Variable le : A -> A -> bool.
@@ -52,7 +54,7 @@ Qed.
 Theorem isort_ok l : sorted (isort l).
 Proof.
     elim: l => //= a l IH.
-    by apply: insert_ok.
+    by apply insert_ok.
 Qed.
 
 (* perm_eq が seq で定義されているが補題だけを使う *)
@@ -66,8 +68,8 @@ Qed.
 (* perm_trans : forall (T : eqType), transitive (seq T) perm_eq *)
 Theorem isort_perm l : perm_eq l (isort l).
 Proof.
-    elim: l => //= a l IH. Search "perm_".
-    apply/perm_eq_trans/insert_perm.
+    elim: l => //= a l IH. (* perm_eq_trans が perm_trans に変わった *)
+    apply/perm_trans/insert_perm.
     by rewrite perm_cons.
 Qed.
 End sort.
@@ -77,17 +79,29 @@ Definition isortn : seq nat -> seq nat := isort _ leq.
 Definition sortedn := sorted _ leq.
 Lemma leq_total a b : ~~ (a <= b) -> b <= a.
 Proof.
-    move: (leq_total a b) => /orP[HL|HR] H => //.
+    move: (leq_total a b) => /orP[HL|HR] H //.
     case: ((negP H) HL).
+Restart.
+    Search "~~" "<=".
+    rewrite -ltnNge.
+    Search (_ < _ -> _ <= _).
+    by apply: ltnW.
 Qed.
 
 Theorem isortn_ok l : sortedn (isortn l) && perm_eq l (isortn l).
 Proof.
     apply/andP. split.
     - apply: isort_ok.
-        + move=>m n p. apply: leq_trans.
+        + Check leq_trans. (* 引数の順番が違う *)
+          move=>m n p. apply: leq_trans.
         + apply: leq_total.
     - apply: isort_perm.
+Restart.
+    apply/andP. split.
+    - apply: isort_ok => m n p.
+        + by apply: leq_trans.
+        + by apply: leq_total.
+    - by apply: isort_perm.
 Qed.
 
 Require Import Extraction.
