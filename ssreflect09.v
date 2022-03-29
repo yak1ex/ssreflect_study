@@ -112,7 +112,28 @@ Proof.
         rewrite leq_exp2r //.
         rewrite subn_gt0 ltn_exp2r //.
         by rewrite -{1}(expn1 n.+2) leq_exp2l.
-Admitted.
+    rewrite -IHn.
+    rewrite [in n.+3](_ : n.+3 = 1+n.+2) //.
+    rewrite Pascal.
+    transitivity (Tm n.+1 + (\sum_(1 <= k < m) 'C(m,k) * n.+2^k)).
+        rewrite -big_split /=.
+        apply eq_bigr => i _.
+        rewrite /Sk.
+        rewrite (@big_cat_nat _ _ _ n.+2) //=.
+        rewrite big_nat1.
+        by rewrite mulnDr.
+    congr (_ + _).
+    transitivity ((\sum_(0 <= k < m.+1) 'C(m,k) * n.+2^k) - 1 - n.+2^m).
+        symmetry.
+        rewrite (@big_cat_nat _ _ _ 1) //=.
+        rewrite addnC big_nat1 bin0 expn0 mul1n addnK.
+        rewrite (@big_cat_nat _ _ _ m) //=.
+        by rewrite big_nat1 binn mul1n addnK.
+    rewrite big_mkord.
+    do 2 congr (_ - _).
+    apply eq_bigr => i _.
+    by rewrite exp1n mul1n.
+Qed.
 
 Theorem Skp p k : p > 2 -> prime p -> 1 <= k < p.-1 -> p %| Sk k p.-1.
 Admitted.
