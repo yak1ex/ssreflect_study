@@ -311,14 +311,14 @@ Proof. rewrite !leq'E; apply leq_trans. Qed.
 
 Lemma leq'_total m n : ~~ leq' m n -> leq' n m.
 Proof.
-    rewrite !leq'E => H. case: (leqP m n) => HH.
-    - have Hcontra: (m <= n) && ~~ (m <= n) by rewrite H HH.
-      by rewrite andbN in Hcontra.
-    - rewrite leq_eqVlt. apply/orP. by right.
+  rewrite !leq'E => H. case: (leqP m n) => HH.
+  - have Hcontra: (m <= n) && ~~ (m <= n) by rewrite H HH.
+    by rewrite andbN in Hcontra.
+  - rewrite leq_eqVlt. apply/orP. by right.
 Restart.
-    rewrite !leq'E => H.
-    move: (orP (leq_total m n)) => [HL|HR] //.
-    case: ((negP H) HL).
+  rewrite !leq'E => H.
+  move: (orP (leq_total m n)) => [HL|HR] //.
+  case: ((negP H) HL).
 Restart.
   rewrite !leq'E.
   by case: (m <= n) (leq_total m n).
