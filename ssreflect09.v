@@ -135,6 +135,22 @@ Proof.
   by rewrite exp1n mul1n.
 Qed.
 
+Lemma Tmp p : p > 2 -> p  %| Tm p.-1.
+Proof.
+  move=>HP.
+  rewrite -subn1.
+  have <-: (p - 1) - 1 + 1 = p - 1.
+    rewrite subnK // subn_gt0.
+    apply ltn_trans with 2 => //.
+  rewrite addn1 !subn1.
+  rewrite Tmn -addn2 -subn2 subnK.
+  apply dvdn_sub => //.
+  rewrite -{1}(expn1 p).
+  apply dvdn_exp2l.
+  apply ltn_trans with 1 => //.
+  apply ltn_trans with 2 => //.
+Qed.
+
 Theorem Skp p k : p > 2 -> prime p -> 1 <= k < p.-1 -> p %| Sk k p.-1.
 Admitted.
 End Nagoya2013.
