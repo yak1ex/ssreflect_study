@@ -252,25 +252,53 @@ Proof.
   apply ltn_trans with 1 => //.
   apply ltn_trans with 2 => //.
 Qed.
+End Nagoya2013.
 
-Search "dvdn".
+Require Import Wf_nat.
 (* dvdn_addr  forall m d n : nat, d %| m -> (d %| m + n) = (d %| n) *)
 (* m = k.+1 のとき *)
 (* Tm p.-1 = C'(k.+1,1) * Sk 1 (p.-1) + ... + C'(k.+1,k.-1) * Sk k.-1 p.-1 + C'(k+1,k) * Sk k p.-1 *)
 (* p %| Tm p.-1 *)
 (* p %| C'(k.+1,1) * Sk 1 (p.-1) + ... + C'(k.+1,k.-1) * Sk k.-1 p.-1 + C'(k+1,k) * Sk k p.-1 *)
 (* 帰納法で p %| Sk 1 p.-1, ..., p %| Sk k.-1 p.-1 が言えていれば *)
+(* p %| C'(k+1,k) * Sk k p.-1 が言える *)
+(* つまり p %| (k + 1) * Sk k p.-1 *)
+(* k + 1 < p なので ~~ p %| k + 1 *)
+(* さらに p が素数なので p %| Sk k p.-1 になる *)
 Theorem Skp p k : p > 2 -> prime p -> 1 <= k < p.-1 -> p %| Sk k p.-1.
 Proof.
-  move=>Hp2 Hprime Hk.
-  assert (m = k.+1).
-  move: (Tmp p Hp2) => HTm.
+  move=>Hp2 Hprime.
+  elim/lt_wf_ind: k => k IH /andP[HkL HkR].
+  have Hk: 1 < k.+1.
+    by rewrite -[1]add0n -[k.+1]addn1 ltn_add2r.
+  move: (Tmp k.+1 Hk p Hp2) => HTm.
   unfold Tm in HTm.
-  rewrite H in HTm.
-  move: Hk H HTm.
-  elim: k => // k IH Hk _ .
-Admitted.
-End Nagoya2013.
+  rewrite (@big_cat_nat _ _ _ k) //= in HTm.
+  rewrite big_nat1 in HTm.
+  rewrite -bin_sub //= -[k.+1]addn1 in HTm.
+  rewrite -addnBAC //= in HTm.
+  rewrite subnn add0n bin1 in HTm.
+  have ->: (p %| Sk k p.-1) = (p %| (k + 1) * Sk k p.-1).
+    rewrite Euclid_dvdM //.
+    rewrite (@gtnNdvd (k + 1) _) //=.
+    by apply ltn_addr.
+    by rewrite addnC -ltn_subRL subn1.
+  have Hpsum: p %| \sum_(1 <= i < k) 'C(k + 1, i) * Sk i p.-1.
+    rewrite big_add1.
+    rewrite big_mkord.
+    apply dvdn_sum => i _.
+    rewrite dvdn_mull //.
+    apply IH.
+    apply /ltP.
+    move: (ltn_ord i) => Hi.
+    by rewrite -[i.+1]addn1 addnC -ltn_subRL subn1.
+    apply /andP. split.
+    done.
+    move: (ltn_ord i) => Hi.
+    apply ltn_trans with k => //.
+    by rewrite -[i.+1]addn1 addnC -ltn_subRL subn1.
+  by rewrite -(dvdn_addr _ Hpsum).
+Qed.
 
 (*
 subn1 : n - 1 = n.-1
