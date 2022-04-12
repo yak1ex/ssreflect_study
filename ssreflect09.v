@@ -1,4 +1,7 @@
+(* 数学：総和・二項係数 *)
 From mathcomp Require Import all_ssreflect.
+
+(* 1 有限型：fintype *)
 
 (*
 Definition enum (T : finType) : seq T := ... (* T の全ての元の列 *)
@@ -32,6 +35,71 @@ unlock
 val_ord_enum
 	 : forall n : nat, [seq val i | i <- ord_enum n] = iota 0 n
 *)
+
+(* 2 総和：bigop *)
+
+Print addn_monoid.
+(*
+addn_monoid =
+Monoid.Law (idm:=0) (operator:=addn) addnA add0n addn0
+	 : Monoid.law 0
+*)
+Print Monoid.Law.
+(*
+Record law (T : Type) (idm : T) : Type := Law
+  { operator : T -> T -> T;
+	_ : associative operator;
+    _ : left_id idm operator;
+    _ : right_id idm operator }.
+*)
+Print addn_addoid.
+(*
+addn_addoid =
+Monoid.AddLaw (mul:=muln) (add_operator:=addn_comoid) mulnDl mulnDr
+	 : Monoid.add_law 0 muln
+*)
+Print Monoid.ComLaw.
+(*
+Record com_law (T : Type) (idm : T) : Type := ComLaw
+  { com_operator : Monoid.law idm;  _ : commutative com_operator }.
+*)
+Print Monoid.AddLaw.
+(*
+Record add_law (T : Type) (idm : T) (mul : T -> T -> T) : Type := AddLaw
+  { add_operator : Monoid.com_law idm;
+	  _ : left_distributive mul add_operator;
+    _ : right_distributive mul add_operator }.
+*)
+(* iota m n = [:: m;m+1;...;m+n-1] *)
+(* は正しいけど index_iota にするとかしないといけない *)
+(*
+Definition \big[op/un]_(m <= i < n | P i) F i :=
+  \big[op/un]_(i <- index_iota m n | P i) F i.
+*)
+Check big_cat_nat.
+(* Monoid.law なので結合則と単位元のみ *)
+(*
+big_cat_nat
+	 : forall (R : Type) (idx : R) (op : Monoid.law idx)
+         (n m p : nat) (P : pred nat) (F : nat -> R),
+       m <= n ->
+       n <= p ->
+       \big[op/idx]_(m <= i < p | P i) F i =
+       op (\big[op/idx]_(m <= i < n | P i) F i)
+         (\big[op/idx]_(n <= i < p | P i) F i)
+*)
+Check big_split.
+(* Monoid.com_law なので交換則のみ *)
+(*
+big_split
+	 : forall (R : Type) (idx : R) (op : Monoid.com_law idx)
+         (I : Type) (r : seq I) (P : pred I) (F1 F2 : I -> R),
+       \big[op/idx]_(i <- r | P i) op (F1 i) (F2 i) =
+       op (\big[op/idx]_(i <- r | P i) F1 i)
+         (\big[op/idx]_(i <- r | P i) F2 i)
+*)
+
+(* 3 二項係数 *)
 
 Section Nagoya2013.
 Definition Sk k n := \sum_(1 <= i < n.+1) i^k.
