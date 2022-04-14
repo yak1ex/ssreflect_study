@@ -14,12 +14,18 @@ Proof.
   split.
   - move/(f_equal (lfun_img f)).
     rewrite limg_comp limg_add.
-    admit.
+    move: (subvv (lker f)).
+    rewrite lkerE => /eqP ->.
+    by rewrite addv0 => ->.
   - rewrite limg_comp => Hf'.
     move: (limg_ker_dim f (limg f)).
     rewrite -[RHS]add0n -Hf' => /eqP.
     rewrite eqn_add2r dimv_eq0 => /eqP /dimv_disjoint_sum.
-Admitted.
+    move: (limg_ker_dim f fullv).
+    rewrite capfv addnC => -> Hdim.
+    apply/eqP.
+    by rewrite eqEdim Hdim subvf leqnn.
+Qed.
 End Problem1.
 
 Section Problem2.
@@ -50,13 +56,20 @@ Proof.
   rewrite addrAC eq_sym -subr_eq eq_sym subrr => /eqP Hfg.
   move: (f_equal g Hfg).
   rewrite !linearD /= Pg linear0 => /eqP.
-Admitted.
+  rewrite -mulr2n -scaler_nat scaler_eq0 Num.Theory.pnatr_eq0 => /orP[_|/eqP HR] //.
+  by rewrite -Hfg HR addr0.
+Qed.
 
 Theorem equiv2 :
   projection (p + q) <-> (forall x, p (q x) = 0 /\ q (p x) = 0).
 Proof.
   split=> H x.
-Admitted.
+  - move: (f_g_0 _ _ x proj_p proj_q H) => ->.
+    rewrite addrC in H.
+    by move: (f_g_0 _ _ x proj_q proj_p H) => ->.
+  - move: (H x) => [HL HR].
+    by rewrite !add_lfunE !linearD /= HL HR addr0 addrA addr0 proj_p proj_q.
+Qed.
 End a.
 
 Section b.
