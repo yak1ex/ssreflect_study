@@ -76,7 +76,13 @@ Section b.
 Hypothesis proj_pq : projection (p + q).
 
 Lemma b1a x : x \in limg p -> x \in limg q -> x = 0.
-Admitted.
+Proof.
+  move => Hpx Hqx.
+  move: ((proj1 (proj_idE p)) proj_p x Hpx) => Hpxx.
+  move: ((proj1 (proj_idE q)) proj_q x Hqx) => Hqxx.
+  move: ((proj1 equiv2) proj_pq x) => [Hpqx _].
+  by rewrite -Hpxx -Hqxx.
+Qed.
 
 Lemma b1b : directv (limg p + limg q).
 Proof.
@@ -84,20 +90,37 @@ Proof.
   rewrite -subv0.
   apply/subvP => u /memv_capP [Hp Hq].
   rewrite memv0.
-Admitted.
+  by move: (b1a _ Hp Hq) => ->.
+Qed.
 
 Lemma limg_sub_lker f g :
   projection f -> projection g -> projection (f+g) -> (limg f <= lker g)%VS.
-Admitted.
+Proof.
+  move=> Pf Pg Pfg.
+  apply/subvP => u /memv_imgP [x [_ Hfv]].
+  rewrite addrC in Pfg.
+  by rewrite memv_ker Hfv (f_g_0 _ _ _ Pg Pf Pfg).
+Qed.
 
-Lemma b1c : (limg p <= lker q)%VS. Admitted.
+Lemma b1c : (limg p <= lker q)%VS.
+Proof.
+  apply: (limg_sub_lker p q proj_p proj_q proj_pq).
+Qed.
 
-Lemma b1c' : (limg q <= lker p)%VS. Admitted.
+Lemma b1c' : (limg q <= lker p)%VS.
+Proof.
+  move: proj_pq => proj_qp.
+  rewrite addrC in proj_qp.
+  apply: (limg_sub_lker q p proj_q proj_p proj_qp).
+Qed.
+
 
 Lemma limg_addv (f g : 'End(E)) : (limg (f + g)%R <= limg f + limg g)%VS.
 Proof.
   apply/subvP => x /memv_imgP [u _ ->].
-Admitted.
+  rewrite add_lfunE.
+  apply/memv_add;apply/memv_img/memvf.
+Qed.
 
 Theorem b1 : limg (p+q) = (limg p + limg q)%VS.
 Proof.
@@ -106,13 +129,20 @@ Proof.
   have -> : u + v = (p + q) (u + v).
   rewrite lfun_simp !linearD /=.
   rewrite (proj1 (proj_idE p)) // (proj1 (proj_idE q) _ v) //.
-Admitted.
+  move: (subvP b1c u Hu) (memv_ker q u) => -> /esym /eqP Hqu.
+  move: (subvP b1c' v Hv) (memv_ker p v) => -> /esym /eqP Hpv.
+  by rewrite Hpv Hqu addr0 add0r.
+  Check memv_img.
+  rewrite memv_img // memvf //.
+Qed.
 Theorem b2 : lker (p+q) = (lker p :&: lker q)%VS.
 Proof.
   apply/vspaceP => x.
   rewrite memv_cap !memv_ker.
   rewrite add_lfunE.
   case Hpx: (p x == 0).
+  - by rewrite (eqP Hpx) add0r.
+  - 
 Admitted.
 End b.
 End Problem2.
