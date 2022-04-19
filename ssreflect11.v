@@ -62,7 +62,9 @@ Proof.
   elim: e d stack => //= [n|e1 IHe1 e2 IHe2|e IHe|e1 IHe1 e2 IHe2] d stack.
   - by rewrite nth_drop.
   - by rewrite eval_code_cat IHe2 eval_code_cat IHe1.
-Admitted.
+  - by rewrite eval_code_cat IHe.
+  - by rewrite eval_code_cat IHe2 eval_code_cat IHe1.
+Qed.
 End Simple.
 
 (* Iterating calculator *)
@@ -172,13 +174,22 @@ Hint Constructors balanced.
 
 Lemma eval_drop_cat st l1 l2 :
   eval_drop (length l1) st (l1 ++ Cnext :: l2) = eval_code st l2.
-Admitted.
+Proof.
+  by elim: l1 => //.
+Qed.
 
 Check eq_iter. (* 証明に使える *)
 Lemma eval_code_cat stack (l1 l2 : seq code) :
   balanced l1 ->
   eval_code stack (l1 ++ l2) =
   eval_code (eval_code stack l1) l2.
+Proof.
+  elim: l1 stack => // a l IH stack.
+  case: a.
+  - move=> z Hb /=.
+    case E: _ / Hb => //.
+    + move Heq: l => l'. move: Heq. case l' => //.
+      move => c l0 Heq. rewrite Heq in E.
 Admitted.
 
 Lemma compile_balanced n e : balanced (compile n e).
