@@ -142,8 +142,21 @@ Proof.
   rewrite add_lfunE.
   case Hpx: (p x == 0).
   - by rewrite (eqP Hpx) add0r.
-  - 
-Admitted.
+  - rewrite Bool.andb_false_l.
+    apply/eqP => /eqP Hpq.
+    move: b1b => /directv_add_unique H.
+    move: (H (p x) 0 (q x) 0
+      (memv_img _ (memvf _))
+      (mem0v _)
+      (memv_img _ (memvf _))
+      (mem0v _)
+    ).
+    rewrite addr0 => Heq.
+    rewrite Heq in Hpq.
+    move: (pair_eq1 Hpq) => /= /eqP Hpx0.
+    rewrite Hpx0 in Hpx.
+    by move: Hpx => /eqP Hpx.
+Qed.
 End b.
 End Problem2.
 
