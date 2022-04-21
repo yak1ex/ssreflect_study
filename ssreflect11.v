@@ -184,20 +184,32 @@ Lemma eval_code_cat stack (l1 l2 : seq code) :
   eval_code stack (l1 ++ l2) =
   eval_code (eval_code stack l1) l2.
 Proof.
-  elim: l1 stack => // a l IH stack.
-  case: a.
-  - move=> z Hb /=.
-    case E: _ / Hb => //.
-    + move Heq: l => l'. move: Heq. case l' => //.
-      move => c l0 Heq. rewrite Heq in E.
-Admitted.
+  move => Hb.
+  elim: Hb l2 stack => [c Hn|la lb Hba IHa Hbb IHb|l Hb IH] l2 stack.
+  - case: c Hn => //.
+  - by rewrite -catA !IHa IHb.
+  - rewrite /= -catA !eval_drop_cat /=.
+    case stack => // z l'.
+    case z => // => p.
+    have Heq: (eval_code^~ (l ++ Cnext :: l2)) =1 (eval_code^~ (l ++ [:: Cnext])).
+      move => st. rewrite !IH //=.
+    by rewrite (eq_iter Heq (Pos.to_nat p)).
+Qed.
 
 Lemma compile_balanced n e : balanced (compile n e).
 Proof. by elim: e n => /=; auto. Qed.
 
 Theorem compile_correct e d stack :
   eval_code stack (compile d e) = eval (drop d stack) e :: stack.
-Admitted.
+Proof.
+  elim: e d stack => //= [n|e1 IH1 e2 IH2|e IH|e1 IH1 e2 IH2] d stack.
+  - by rewrite nth_drop.
+  - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)) IH2.
+    rewrite (eval_code_cat _ _ _ (compile_balanced _ _)) IH1 //.
+  - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)) IH //.
+  - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)) IH2.
+    rewrite (eval_code_cat _ _ _ (compile_balanced _ _)) IH1 //.
+Qed.
 
 Lemma compile_cmd_balanced c : balanced (compile_cmd c).
 Proof. by elim: c => /=; auto using compile_balanced. Qed.
@@ -206,7 +218,20 @@ Hint Resolve compile_balanced compile_cmd_balanced.
 
 Theorem compile_cmd_correct c stack :
   eval_code stack (compile_cmd c) = eval_cmd stack c.
-Admitted.
+Proof.
+  elim: c stack => //= [n e|c1 IH1 c2 IH2|e c IH] stack.
+  - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)).
+    rewrite compile_correct drop0 //=.
+  - by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) IH1 IH2.
+  - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)).
+    rewrite compile_correct drop0 //=.
+    rewrite eval_drop_cat /=.
+    have Heq: (eval_code^~ (compile_cmd c ++ [:: Cnext])) =1 (eval_cmd^~ c).
+      move => st.
+      by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) /= IH.
+    case (eval stack e) => // p.
+    by rewrite (eq_iter Heq (Pos.to_nat p)).
+Qed.
 End Iterator.
 
 Extraction Iterator.eval_code.
