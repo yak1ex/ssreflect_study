@@ -64,11 +64,28 @@ Fixpoint union (vl1 vl2 : list var) :=
 
 Lemma in_union_or v vl1 vl2 :
   v \in union vl1 vl2 = (v \in vl1) || (v \in vl2).
-Proof. elim: vl1 vl2 => //= x vl IH vl2. Admitted.
-
-  (* 完全性のために必要 *)
+Proof. elim: vl1 vl2 => //= x vl IH vl2.
+  case H: (x \in vl2).
+  - rewrite IH. case H': (v == x).
+    + by rewrite (eqP H') H !orbT.
+    + congr (_ || _). by rewrite in_cons H' orFb.
+  - rewrite IH. case H': (v == x).
+    + by rewrite (eqP H') !in_cons eq_refl !orbT !orTb.
+    + by rewrite !in_cons H' !orFb.
+Restart.
+  elim: vl1 vl2 => //= x vl IH vl2.
+  case: ifPn => Hx; rewrite IH; case H': (v == x).
+  - by rewrite (eqP H') Hx !orbT.
+  - congr (_ || _). by rewrite in_cons H' orFb.
+  - by rewrite (eqP H') !in_cons eq_refl !orbT !orTb.
+  - by rewrite !in_cons H' !orFb.
+Qed.
+(* 完全性のために必要 *)
 Lemma uniq_union vl1 vl2 : uniq vl2 -> uniq (union vl1 vl2).
-Proof. elim: vl1 vl2 => //=. Admitted.
+Proof. elim: vl1 vl2 => //= a l IH vl2 Hu.
+  case: ifPn => Ha; apply IH => //=.
+  by rewrite Ha Hu.
+Qed.
 
 (* 出現変数 *)
 Fixpoint vars (t : tree) : list var :=

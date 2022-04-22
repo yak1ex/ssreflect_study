@@ -17,7 +17,7 @@ This repo includes MY working memo for SSReflect study sessions in [coqtokyo](ht
 |[ssreflect10.v](ssreflect10.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq10.pdf)|:arrow_heading_up: Just my solution||
 |[ssreflect11.v](ssreflect11.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq11.pdf)|:arrow_heading_up: Just my solution||
 |[ssreflect12.v](ssreflect12.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq12.pdf)|:no_entry_sign: Not yet prepared||
-|[ssreflect13.v](ssreflect13.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq13.pdf)|:no_entry_sign: Not yet prepared||
+|[ssreflect13.v](ssreflect13.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq13.pdf)|:arrows_counterclockwise: Preparing||
 
 ## status
 
