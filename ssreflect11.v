@@ -20,6 +20,9 @@ Fixpoint eval (env : list Z) (e : expr) : Z := (* 評価関数 *)
   | Mul e1 e2 => eval env e1 * eval env e2
   end%Z.
 
+(* (x+3)*4 for x=2 *)(* not in PDF *)
+Eval compute in eval [:: 2%Z] (Mul (Add (Var 0) (Cst 3)) (Cst 4)).
+
 Inductive code : Set := (* 逆ポーランド記法による計算譜 *)
   | Cimm of Z
   | Cget of nat
@@ -43,6 +46,9 @@ Fixpoint eval_code (stack : list Z) (l : list code) :=
     in eval_code stack' l'
   end.
 
+(* not in PDF *)
+Eval compute in eval_code [:: 2%Z] [:: Cget 0; Cimm 3; Cadd; Cimm 4; Cmul].
+
 Fixpoint compile d (e : expr) : list code :=
   match e with
   | Cst x => [:: Cimm x]
@@ -52,10 +58,16 @@ Fixpoint compile d (e : expr) : list code :=
   | Mul e1 e2 => compile d e2 ++ compile (S d) e1 ++ [:: Cmul]
   end.
 
+(* not in PDF *)
+Eval compute in compile 0 (Mul (Add (Var 0) (Cst 3)) (Cst 4)).
+Eval compute in
+  eval_code [:: 2%Z] (compile 0 (Mul (Add (Var 0) (Cst 3)) (Cst 4))).
+
 Lemma eval_code_cat stack l1 l2 :
   eval_code stack (l1 ++ l2) = eval_code (eval_code stack l1) l2.
 Proof. by elim: l1 stack => //=. Qed.
 
+(* drop n s == s minus its first n items ([::] if size s <= n)     *)(* this comment is not in PDF *)
 Theorem compile_correct e d stack : (* コンパイラの正しさ *)
   eval_code stack (compile d e) = eval (drop d stack) e :: stack.
 Proof.
@@ -91,6 +103,19 @@ Inductive cmd : Set :=
   | Seq of cmd & cmd (* 順番に実行 *)
   | Repeat of expr & cmd. (* n 回繰り返す *)
 
+(* not in PDF *)
+(* r <- 1; repeat (i-1) {r <- i * r; i <- i-1} *)
+
+Definition fact :=
+  Seq (Assign 1 (Cst 1))
+      (Repeat (Add (Var 0) (Cst (-1)))
+         (Seq (Assign 1 (Mul (Var 0) (Var 1)))
+              (Assign 0 (Add (Var 0) (Cst (-1)))))).
+
+Print Z.
+Print positive.
+Print iter.
+
 Fixpoint eval_cmd (env : list Z) (c : cmd) : list Z :=
   match c with
   | Assign n e => set_nth 0%Z env n (eval env e)
@@ -100,6 +125,8 @@ Fixpoint eval_cmd (env : list Z) (c : cmd) : list Z :=
     then iter (Pos.to_nat n) (fun e => eval_cmd e c) env
     else env
   end.
+
+Eval compute in eval_cmd [:: 5%Z] fact.
 
 Inductive code : Set :=
   | Cimm of Z
@@ -160,6 +187,10 @@ Fixpoint compile_cmd (c : cmd) : list code :=
       let l := compile_cmd c in
       compile 0 e ++ [:: Crep (length l)] ++ l ++ [:: Cnext]
   end.
+
+
+Eval compute in compile_cmd fact.
+Eval compute in eval_code [:: 5%Z] (compile_cmd fact).
 
 Definition neutral c :=
   match c with Cnext | Crep _ => false | _ => true end.
