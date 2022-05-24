@@ -499,4 +499,42 @@ Proof.
     by rewrite -IH eval_code_cat.
 Qed.
 (* 整数の商 *)
+(* m: var 0, n: var 1, absm: var 2, sgn: var 3, q: var 4, m = qn + r, 0 <= r < |n| *)
+(* n = 0 ==> undefined *)
+(* m = 0 ==> q = 0 *)
+(*  4 =  1 *  3 + 1 *)
+(* -4 = -2 *  3 + 2 *)
+(* -4 =  2 * -3 + 2 *)
+(*  4 = -1 * -3 + 1 *)
+
+(* sgn = -1; if n * m > 0 then sgn = -sgn; absm = |m|;
+   loop absm { if n > 0 { if n - m + 1 > 0 { n = n - m; r = r + sgn }}; if n < 0 { n = n + m; r = r + sgn }} *)
+Definition div :=
+  If (Mul (Var 1) (Var 1))
+    (Seq (Assign 3 (Cst (-1)%Z))
+      (Seq (If (Mul (Var 0) (Var 1)) (Assign 3 (Min (Var 3))))
+        (Seq (If (Min (Var 1)) (Assign 1 (Min (Var 1))))
+          (Seq (Assign 2 (Var 0))
+            (Seq (If (Min (Var 2)) (Assign 2 (Min (Var 2))))
+            (Repeat (Var 2)
+                    (Seq (If (Var 0) (If (Add (Add (Var 0) (Min (Var 1))) (Cst 1%Z))
+                                        (Seq (Assign 0 (Add (Var 0) (Min (Var 1))))
+                                              (Assign 4 (Add (Var 4) (Var 3))))))
+                          (If (Min (Var 0)) (Seq (Assign 0 (Add (Var 0) (Var 1)))
+                                                  (Assign 4 (Add (Var 4) (Var 3)))))))))))).
+
+Eval compute in eval_cmd [:: 6%Z; 2%Z] div.
+Eval compute in eval_cmd [:: 10%Z; 3%Z] div.
+Eval compute in eval_cmd [:: (-6)%Z; 2%Z] div.
+Eval compute in eval_cmd [:: (-6)%Z; (-2)%Z] div.
+Eval compute in eval_cmd [:: 6%Z; (-2)%Z] div.
+Eval compute in eval_cmd [:: 4%Z; 3%Z] div.
+Eval compute in eval_cmd [:: (-4)%Z; 3%Z] div.
+Eval compute in eval_cmd [:: (-4)%Z; (-3)%Z] div.
+Eval compute in eval_cmd [:: 4%Z; (-3)%Z] div.
+Eval compute in eval_cmd [:: 4%Z; 0%Z] div.
+Eval compute in eval_cmd [:: 0%Z; 1%Z] div. (* Var 4 = 0 *)
+Eval compute in eval_cmd [:: 0%Z; (-1)%Z] div.
+Eval compute in eval_cmd [:: 0%Z; 0%Z] div.
+
 End Iterator'.
