@@ -72,7 +72,7 @@ Theorem compile_correct e d stack : (* コンパイラの正しさ *)
   eval_code stack (compile d e) = eval (drop d stack) e :: stack.
 Proof.
   elim: e d stack => //= [n|e1 IHe1 e2 IHe2|e IHe|e1 IHe1 e2 IHe2] d stack.
-  - by rewrite nth_drop.
+  - by rewrite nth_drop. (* nht_drop は ssreflect.seq *)
   - by rewrite eval_code_cat IHe2 eval_code_cat IHe1.
   - by rewrite eval_code_cat IHe.
   - by rewrite eval_code_cat IHe2 eval_code_cat IHe1.
@@ -165,7 +165,7 @@ Fixpoint eval_code (stack : list Z) (l : list code) :=
   end
 with eval_drop n st (l : list code) := (* 相互再帰 *)
   match l, n with
-  | _ :: l', 0 => eval_code st l'
+  | _ :: l', 0 => eval_code st l' (* このとき _ は Cnext のはず *)(* じゃそこまで捨てればいいのではと思ったけど多重ループが駄目そう？ *)
   | _ :: l', S n' => eval_drop n' st l'
   | [::], _ => st
   end.
@@ -178,6 +178,7 @@ Fixpoint compile d (e : expr) : list code :=
   | Min e1 => compile d e1 ++ [:: Cmin]
   | Mul e1 e2 => compile d e2 ++ compile (S d) e1 ++ [:: Cmul]
   end.
+(* どの expr でも stack は 1 つ伸びる *)
 
 Fixpoint compile_cmd (c : cmd) : list code :=
   match c with
@@ -187,7 +188,7 @@ Fixpoint compile_cmd (c : cmd) : list code :=
       let l := compile_cmd c in
       compile 0 e ++ [:: Crep (length l)] ++ l ++ [:: Cnext]
   end.
-
+(* cmd の文脈では stack は素の状態 *)
 
 Eval compute in compile_cmd fact.
 Eval compute in eval_code [:: 5%Z] (compile_cmd fact).
@@ -207,6 +208,8 @@ Lemma eval_drop_cat st l1 l2 :
   eval_drop (length l1) st (l1 ++ Cnext :: l2) = eval_code st l2.
 Proof.
   by elim: l1 => //.
+Restart.
+  by elim: l1.
 Qed.
 
 Check eq_iter. (* 証明に使える *)
@@ -225,6 +228,25 @@ Proof.
     have Heq: (eval_code^~ (l ++ Cnext :: l2)) =1 (eval_code^~ (l ++ [:: Cnext])).
       move => st. rewrite !IH //=.
     by rewrite (eq_iter Heq (Pos.to_nat p)).
+Restart.
+  move=>balance.
+  move: stack l2.
+  elim: l1 / balance.
+  - by case.
+  - move=> l1 l2 balance1 IH1 balance2 IH2 stack l3.
+    by rewrite IH1 -catA IH1 IH2.
+  - move=> l1 balance IH stack l2.
+    rewrite [LHS]/=.
+    rewrite -catA.
+    rewrite eval_drop_cat.
+    case: stack => //=.
+    + by rewrite eval_drop_cat.
+    + move => n l.
+      rewrite eval_drop_cat.
+      case: n => //= p.
+      congr (eval_code _).
+      apply: eq_iter => st.
+      rewrite !IH //.
 Qed.
 
 Lemma compile_balanced n e : balanced (compile n e).
@@ -266,3 +288,4 @@ Qed.
 End Iterator.
 
 Extraction Iterator.eval_code.
+(* 練習問題の2 If of expr & cmd やってない *)
