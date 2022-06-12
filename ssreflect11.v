@@ -223,7 +223,7 @@ Proof.
   - case: c Hn => //.
   - by rewrite -catA !IHa IHb.
   - rewrite /= -catA !eval_drop_cat /=.
-    case stack => // z l'.
+    case: stack => // z stack.
     case z => // => p.
     have Heq: (eval_code^~ (l ++ Cnext :: l2)) =1 (eval_code^~ (l ++ [:: Cnext])).
       move => st. rewrite !IH //=.
@@ -277,14 +277,25 @@ Proof.
     rewrite compile_correct drop0 //=.
   - by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) IH1 IH2.
   - rewrite (eval_code_cat _ _ _ (compile_balanced _ _)).
-    rewrite compile_correct drop0 //=.
+    rewrite compile_correct drop0 /=.
     rewrite eval_drop_cat /=.
     have Heq: (eval_code^~ (compile_cmd c ++ [:: Cnext])) =1 (eval_cmd^~ c).
       move => st.
       by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) /= IH.
     case (eval stack e) => // p.
-    by rewrite (eq_iter Heq (Pos.to_nat p)).
-Qed.
+    rewrite (eq_iter Heq (Pos.to_nat p)).
+Restart.
+elim: c stack => //= [n e|c1 IH1 c2 IH2|e c IH] stack.
+- rewrite (eval_code_cat _ _ _ (compile_balanced _ _)).
+  rewrite compile_correct drop0 //=.
+- by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) IH1 IH2.
+- rewrite (eval_code_cat _ _ _ (compile_balanced _ _)).
+  rewrite compile_correct drop0 /=.
+  rewrite eval_drop_cat /=.
+  case (eval stack e) => // p.
+  apply eq_iter => st.
+  by rewrite (eval_code_cat _ _ _ (compile_cmd_balanced _)) /= IH.
+  Qed.
 End Iterator.
 
 Extraction Iterator.eval_code.
@@ -445,14 +456,14 @@ Proof.
   - case: c Hn => //.
   - by rewrite -catA !IHa IHb.
   - rewrite /= -catA !eval_drop_cat /=.
-    case stack => // z l'.
+    case: stack => // z stack.
     case z => // p.
     have Heq: (eval_code^~ (l ++ Cnext :: l2)) =1 (eval_code^~ (l ++ [:: Cnext])).
       move => st. rewrite !IH //=.
     by rewrite (eq_iter Heq (Pos.to_nat p)).
   - (* 追加 *)
     rewrite /= -catA !eval_drop_cat /=.
-    case stack => // z l'.
+    case: stack => // z stack.
     case z => // p.
     by rewrite !IH.
 Qed.
@@ -522,6 +533,7 @@ Definition div :=
                                               (Assign 4 (Add (Var 4) (Var 3))))))
                           (If (Min (Var 0)) (Seq (Assign 0 (Add (Var 0) (Var 1)))
                                                   (Assign 4 (Add (Var 4) (Var 3)))))))))))).
+(* 正しいことを証明できるといいかも Z上のdivと同じ？ 負の数のところは微妙かも *)
 
 Eval compute in eval_cmd [:: 6%Z; 2%Z] div.
 Eval compute in eval_cmd [:: 10%Z; 3%Z] div.
