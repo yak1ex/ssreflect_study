@@ -9,7 +9,7 @@ Inductive expr : Set :=
   | Abs of expr
   | App of expr & expr.
 
-Fixpoint shift k (e : expr) := (* 自由変数をずらす *)
+Fixpoint shift k (e : expr) := (* k番目以降の自由変数をずらす *)
   match e with
   | Var n => if k <= n then Var n.+1 else Var n
   | Abs e1 => Abs (shift k.+1 e1)
@@ -77,17 +77,31 @@ Lemma reduce_ok e e' : (* 1-step 簡約の健全性 *)
 Proof.
   move: e'; induction e => //= e'.
     case He: (reduce e) => [e1|] // [] <-.
-    admit.
+    apply/Rabs/IHe/He.
   destruct e1 => //.
-  - admit.
+  - case Hn: (reduce n) => [n1|] //.
+    case He: (reduce e2) => [e1|] // [] <-.
+    apply/Rapp2/IHe2/He.
   - case => <-.
     by constructor.
   - case He1: (reduce (App _ _)) => [e1'|].
+    + case => <-.
+      apply/Rapp1/IHe1/He1.
+    + case He2: (reduce e2) => [e1|] //.
       case => <-.
-Admitted.
+      apply/Rapp2/IHe2/He2.
+Qed.
 
 (* n-step 簡約の健全性 *)
-Theorem eval_ok n e e' : eval n e = e' -> RT_closure reduces e e'. Admitted.
+Theorem eval_ok n e e' : eval n e = e' -> RT_closure reduces e e'.
+Proof.
+  elim: n e => /= [e ->|n IH e] //.
+  case He: (reduce e) => [e1|].
+  - move=> H. apply RTnext with e1.
+    + apply/reduce_ok/He.
+    + apply/IH/H.
+  - by move=>->.
+Qed.
 
 Fixpoint closed_expr n e := (* 変数が n 個以下の項 *)
   match e with
@@ -96,7 +110,14 @@ Fixpoint closed_expr n e := (* 変数が n 個以下の項 *)
   | Abs e1 => closed_expr n.+1 e1
   end.
 
-Lemma shift_closed n e : closed_expr n e -> shift n e = e. Admitted.
+Lemma shift_closed n e : closed_expr n e -> shift n e = e.
+Proof.
+  elim: e n => [k n IH|e IH1 n IH2|e1 IH1 e2 IH2 n /andP [IH3L IH3R]] /=.
+  - case: ifP =>//.
+    by rewrite (ltn_geF IH).
+  - rewrite IH1 //.
+  - rewrite IH2 // IH1 //.
+Qed.
 Lemma open_rec_closed n u e : (* n + 1 個目の変数を代入しても変わらない *)
   closed_expr n e -> open_rec n u e = e.
 Proof.
