@@ -13,9 +13,9 @@ This repo includes MY working memo for SSReflect study sessions in [coqtokyo](ht
 |[ssreflect06.v](ssreflect06.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq6.pdf)|:heavy_check_mark: Session finished||
 |[ssreflect07.v](ssreflect07.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq7.pdf)|:heavy_check_mark: Session finished||
 |[ssreflect08.v](ssreflect08.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq8.pdf)|:heavy_check_mark: Session finished||
-|[ssreflect09.v](ssreflect09.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq9.pdf)|:arrow_forward: Session ongoing||
-|[ssreflect10.v](ssreflect10.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq10.pdf)|:arrow_heading_up: Just my solution||
-|[ssreflect11.v](ssreflect11.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq11.pdf)|:arrow_heading_up: Just my solution||
+|[ssreflect09.v](ssreflect09.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq9.pdf)|:heavy_check_mark: Session finished||
+|[ssreflect10.v](ssreflect10.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq10.pdf)|:heavy_check_mark: Session finished||
+|[ssreflect11.v](ssreflect11.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq11.pdf)|:heavy_check_mark: Session finished||
 |[ssreflect12.v](ssreflect12.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq12.pdf)|:no_entry_sign: Not yet prepared||
 |[ssreflect13.v](ssreflect13.v)|[PDF](https://www.math.nagoya-u.ac.jp/~garrigue/lecture/2020_AW/ssrcoq13.pdf)|:arrows_counterclockwise: Preparing||
 
